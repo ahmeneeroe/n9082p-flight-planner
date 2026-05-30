@@ -1,0 +1,97 @@
+# N9082P Flight Planning Tool
+
+A mobile web app that generates a preflight **A5 safety sheet** for N9082P (1966 PA-24-260B
+Comanche): per-runway takeoff/landing distances & margins, density altitude, wind components,
+stall/approach speeds, and OK/CAU/WARN safety badges — from **live FAA airport data + NWS
+weather + the POH performance calculator**. Supplements ForeFlight with the takeoff/landing/stall
+data its basic performance profile doesn't provide.
+
+## Live
+
+**https://flight-planning.davidameneyro.com** — password-gated (enter the password once; a signed
+cookie keeps you in for 30 days). On iPhone: open it → Share → **Add to Home Screen** for an app icon.
+
+Raw origin (no custom domain, always works): `https://nvnl7kstmkaw7f7iyvjxwayx440fakjq.lambda-url.us-west-2.on.aws/`
+
+## How to use
+
+Open the URL → enter the password → fill **departure, destination, takeoff weight, fuel** → *Generate*.
+Optional **Advanced**: cruise altitude, power %, RPM, mixture, landing-weight override. On the result,
+*Print / Save PDF* gives the A5.
+
+## Data sources (FAA-authoritative)
+
+- **Airports / runways:** FAA AIS (Aeronautical Information Services), bundled to `data/airports_faa.json`
+  (~12,846 US airports) by `tools/build_faa_airports.py`. **Refresh monthly** (FAA 28-day cycle): rerun the
+  builder + redeploy.
+- **Weather:** live METAR from aviationweather.gov (NOAA/NWS Aviation Weather Center); auto-nearest-station
+  for fields without their own METAR (e.g. S95 → KALW).
+- **Performance:** the digitized POH Section 5 calculator in `../Performance/`. **EXPERIMENTAL** — 5%
+  conservative bias, not flight-validated; the sheet says so. Verify against the POH.
+
+## Architecture
+
+```
+Browser → CloudFront (custom domain + HTTPS) → Lambda Function URL → app/handler.py (lambda_handler)
+        → planner/  (data · weather · geo · safety · generate · render)  → A5 HTML
+```
+- Pure Python **standard library only** — no third-party deps; deploys as a plain zip.
+- **Auth:** password → HMAC-signed cookie (`app/handler.py`). *Not* HTTP Basic Auth — Lambda Function URLs
+  remap the `WWW-Authenticate` header, so the browser dialog never appears.
+
+### AWS resources (account <AWS_ACCOUNT_ID>; us-west-2 unless noted)
+| Resource | Value |
+|---|---|
+| Lambda | `n9082p-planner` (handler `handler.lambda_handler`, env `PLANNER_PASSWORD`) |
+| IAM role | `n9082p-planner-role` |
+| Function URL | AuthType NONE; resource policy grants **both** `lambda:InvokeFunctionUrl` + `lambda:InvokeFunction` |
+| ACM cert | us-east-1 `e50c5b65-b203-48b5-8830-92a711b4a7ae` (flight-planning.davidameneyro.com) |
+| CloudFront | `ESYJH857V9VMT` → `d1g4lk8265qufv.cloudfront.net` (CachingDisabled + AllViewerExceptHostHeader) |
+| DNS | Namecheap BasicDNS: `flight-planning` CNAME → CloudFront (+ ACM validation CNAME) |
+
+## Local development
+```
+python3 app/devserver.py        # http://localhost:8000/  (open, no password)
+```
+Pure stdlib; needs internet for live METAR.
+
+## Redeploy (after code or data changes)
+```
+aws sso login                   # if the SSO token has expired (~4h)
+bash deploy/deploy.sh           # build zip → create/update Lambda + Function URL + permissions
+# code-only shortcut:
+bash deploy/build.sh && aws lambda update-function-code \
+  --function-name n9082p-planner --region us-west-2 --zip-file fileb://n9082p-planner.zip
+```
+
+## Monthly FAA data refresh (not yet automated)
+```
+aws sso login
+python3 tools/build_faa_airports.py   # rebuild data/airports_faa.json from FAA AIS
+bash deploy/build.sh && aws lambda update-function-code \
+  --function-name n9082p-planner --region us-west-2 --zip-file fileb://n9082p-planner.zip
+```
+Could be automated with an EventBridge-scheduled refresh Lambda — a future step.
+
+## Two AWS gotchas (already solved, documented in research.md)
+1. **403 on the public Function URL** was *not* an org policy — since **Oct 2025** a public (NONE) URL
+   needs **both** `lambda:InvokeFunctionUrl` and `lambda:InvokeFunction` in its resource policy. `deploy.sh`
+   now adds both.
+2. **Basic Auth never prompted** — Function URLs remap `WWW-Authenticate` → `x-amzn-Remapped-*`. Switched to
+   a signed-cookie login.
+
+## Custom domain runbook (how it was set up)
+1. ACM cert (us-east-1) for the subdomain, DNS-validated via a CNAME at Namecheap.
+2. CloudFront distribution: Function URL as origin + the cert + alias `flight-planning.davidameneyro.com`.
+3. Namecheap CNAME `flight-planning` → the CloudFront domain.
+
+## Notes / follow-ups
+- **Password** is set via the `PLANNER_PASSWORD` env var on the Lambda (never committed to this repo). Pick a strong value and set/rotate it with `deploy/deploy.sh`.
+- Automate the monthly FAA data refresh.
+- Layout: `planner/` (engine) · `app/` (handler + devserver) · `data/` (FAA bundle) · `tools/` (data builder)
+  · `deploy/` (build + deploy) · `files/` (sample A5 + prototypes) · `design.md` · `todo.md` · `research.md`.
+
+## Resume this work
+```
+cd /Users/papillonm5/Documents/Flying/N9082P/Flight-Planning-Tool && claude --resume N9082P-Perfomance-Online
+```

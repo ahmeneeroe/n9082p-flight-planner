@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N9082P Safety — S95 → 7S3</title>
+<style>
+  @page { size: A5 landscape; margin: 6mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    width: 210mm; margin: 0 auto; padding: 8px;
+    font-size: 11px; line-height: 1.3; color: #000;
+  }
+  h1 { font-size: 16px; display: inline; }
+  .route { color: #444; font-size: 12px; display: inline; margin-left: 8px; }
+  .top-bar {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;
+  }
+  .top-params { font-size: 11px; color: #444; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .airport { border: 1px solid #888; border-radius: 3px; padding: 6px 8px; }
+  .apt-header { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  .apt-header .rwy-info { font-weight: 400; font-size: 10px; color: #444; }
+  .apt-meta { font-size: 10px; color: #444; margin-bottom: 5px; }
+  .apt-meta b { color: #000; }
+  table { width: 100%; border-collapse: collapse; font-size: 10px; margin: 3px 0; }
+  th {
+    text-align: left; font-weight: 600; padding: 2px 5px;
+    border-bottom: 1px solid #888;
+    font-size: 8px; color: #444; text-transform: uppercase;
+  }
+  th.r, td.r { text-align: right; }
+  td { padding: 2px 5px; }
+  .sub-header {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    color: #444; letter-spacing: 0.3px; margin: 5px 0 2px;
+  }
+  .badge {
+    display: inline-block; padding: 0 4px; border-radius: 2px;
+    font-size: 8px; font-weight: 700; text-transform: uppercase;
+    border: 1px solid #888;
+  }
+  .badge.ok { background: #fff; }
+  .badge.cau { background: #ddd; }
+  .badge.warn { background: #000; color: #fff; border-color: #000; }
+  .speeds { display: flex; gap: 10px; margin: 3px 0; font-size: 10px; }
+  .speeds b { font-size: 13px; }
+  .speeds .highlight { border-bottom: 2px solid #000; }
+  .remark { font-size: 9px; color: #444; margin-top: 3px; font-style: italic; }
+  .warning-box {
+    border: 2px solid #000; padding: 4px 6px; margin: 4px 0;
+    font-size: 9px; font-weight: 600; background: #fff;
+  }
+  .summary {
+    border: 1px solid #888; border-radius: 3px;
+    padding: 5px 8px; margin-bottom: 4px;
+    display: grid; grid-template-columns: repeat(8, 1fr);
+    gap: 3px 10px; font-size: 10px;
+  }
+  .summary .label { font-size: 7.5px; color: #444; text-transform: uppercase; }
+  .summary .val { font-weight: 700; font-size: 11px; }
+  .summary .val.warn { text-decoration: underline; text-decoration-thickness: 1.5px; }
+  .notes {
+    font-size: 8px; color: #444;
+    border-top: 1px solid #888; padding-top: 3px; margin-top: 3px;
+  }
+  @media print { body { padding: 0; width: auto; } }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div><h1>N9082P</h1><span class="route">S95 &rarr; 7S3</span></div>
+  <div class="top-params">TO <b>2417</b> lb &nbsp;|&nbsp; LDG <b>2300</b> lb &nbsp;|&nbsp; Fuel <b>45</b> gal &nbsp;|&nbsp; Burn est <b>~19.5</b> gal</div>
+</div>
+
+<div class="cols">
+
+  <!-- DEPARTURE -->
+  <div class="airport">
+    <div class="apt-header">S95 &mdash; Martin Fld <span class="rwy-info">Rwy 05-23: 3819 ft</span></div>
+    <div class="apt-meta">
+      <b>54°F</b> &nbsp;PA <b>420</b> &nbsp;DA <b>180</b> ft &nbsp;|&nbsp;
+      Wind <b>210°/11G18kt</b> &rarr; Rwy 23: <b>10 hw</b> / <b>4 xw</b> (gust 17/6)
+    </div>
+    <div class="sub-header">Takeoff &mdash; Rwy 23, 10 kt headwind</div>
+    <table>
+      <thead><tr><th></th><th class="r">Req'd</th><th class="r">Margin</th><th class="r">Ratio</th><th class="r"></th></tr></thead>
+      <tbody>
+        <tr><td>SF ground run</td><td class="r">565</td><td class="r">+3254</td><td class="r">6.8&times;</td><td class="r"><span class="badge ok">OK</span></td></tr>
+        <tr><td>SF over 50 ft</td><td class="r">788</td><td class="r">+3031</td><td class="r">4.8&times;</td><td class="r"><span class="badge ok">OK</span></td></tr>
+        <tr><td>Std ground run</td><td class="r">1130</td><td class="r">+2689</td><td class="r">3.4&times;</td><td class="r"><span class="badge ok">OK</span></td></tr>
+        <tr><td>Std over 50 ft</td><td class="r">1576</td><td class="r">+2243</td><td class="r">2.4&times;</td><td class="r"><span class="badge ok">OK</span></td></tr>
+      </tbody>
+    </table>
+    <div class="sub-header">Stall / Climb</div>
+    <div class="speeds">
+      <span>Vs: <b>57</b> cln <b>52</b> 15° <b>51</b> full</span>
+    </div>
+    <div class="speeds">
+      <span>Vx <b>76</b> &nbsp; Vy <b>96</b> &nbsp; ROC <b>1894</b> fpm</span>
+    </div>
+    <div class="remark">Cruise climb 111 kt &mdash; ROC &lt; 1894</div>
+    <div class="remark">Rwy surface: cracking/raveling per A/FD</div>
+    <div class="remark">Gusts to 18 kt &mdash; XW within 17 kt demo</div>
+  </div>
+
+  <!-- DESTINATION -->
+  <div class="airport">
+    <div class="apt-header">7S3 &mdash; Stark's Twin Oaks <span class="rwy-info">Rwy 02-20: 2465 &times; 48 ft (asph)</span></div>
+    <div class="apt-meta">
+      <b>54°F</b> &nbsp;PA <b>-170</b> &nbsp;DA <b>-550</b> ft &nbsp;|&nbsp;
+      Wind <b>010°/6kt</b> &rarr; Rwy 02: <b>6 hw</b> / <b>1 xw</b>
+    </div>
+
+    <div class="warning-box">
+      Rwy 02 has <b>100 ft displaced threshold</b> &rarr; LDA 2365 ft (full length for takeoff).
+    </div>
+
+    <div class="sub-header">Landing &mdash; Rwy 02 (LDA 2365 ft), 6 kt HW</div>
+    <table>
+      <thead><tr><th></th><th class="r">Req'd</th><th class="r">Margin</th><th class="r">Ratio</th><th class="r"></th></tr></thead>
+      <tbody>
+        <tr><td>SF ground roll</td><td class="r">652</td><td class="r">+1713</td><td class="r">3.6&times;</td><td class="r"><span class="badge ok">OK</span></td></tr>
+        <tr><td>SF over 50 ft</td><td class="r">1127</td><td class="r">+1238</td><td class="r">2.1&times;</td><td class="r"><span class="badge cau">CAU</span></td></tr>
+        <tr><td>Std ground roll</td><td class="r">1304</td><td class="r">+1061</td><td class="r">1.8&times;</td><td class="r"><span class="badge cau">CAU</span></td></tr>
+        <tr><td>Std over 50 ft</td><td class="r">2254</td><td class="r">+111</td><td class="r">1.0&times;</td><td class="r"><span class="badge warn">WARN</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="sub-header">Stall / Approach</div>
+    <div class="speeds">
+      <span>Vs: <b>55</b> cln <b>51</b> 15° <b>50</b> full</span>
+      <span style="margin-left:auto">Vapp: <b class="highlight">65 kt</b></span>
+    </div>
+    <div class="remark">Short-field technique strongly preferred (2465 ft strip, displaced thr)</div>
+    <div class="remark">Rwy 20 landing = 6 kt tailwind (avoid)</div>
+  </div>
+
+</div>
+
+<div class="summary">
+  <div><div class="label">TO Wt</div><div class="val">2417/3100</div></div>
+  <div><div class="label">LDG Wt</div><div class="val">2300/2945</div></div>
+  <div><div class="label">DA S95</div><div class="val">180</div></div>
+  <div><div class="label">DA 7S3</div><div class="val">-550</div></div>
+  <div><div class="label">Rwy S95 23</div><div class="val">2.4&times;</div></div>
+  <div><div class="label">7S3 02 SF 50</div><div class="val">2.1&times;</div></div>
+  <div><div class="label">7S3 02 Std 50</div><div class="val warn">1.0&times;</div></div>
+  <div><div class="label">Xwind</div><div class="val">4/17 (g6)</div></div>
+</div>
+
+<div class="notes">
+  5% conservative bias. Std = 2&times; SF (POH Sec 5 p5-2). WX: KALW (proxy S95) + KHIO (proxy 7S3). TO wt = LDG wt + est burn. POH charts, not flight-tested.
+</div>
+
+</body>
+</html>
