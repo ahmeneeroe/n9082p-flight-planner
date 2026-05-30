@@ -96,6 +96,31 @@ The bundled `data/airports_faa.json` remains the fallback baseline; the manual s
 - Layout: `planner/` (engine) · `app/` (handler + devserver) · `data/` (FAA bundle) · `tools/` (data builder)
   · `deploy/` (build + deploy) · `files/` (sample A5 + prototypes) · `design.md` · `todo.md` · `research.md`.
 
+## Operations & handoff
+
+**Working copy vs. published repo.** Develop and deploy from this working copy
+(`~/Documents/Flying/N9082P/Flight-Planning-Tool`, with the sibling `../Performance`). The
+public GitHub repo (`github.com/ahmeneeroe/n9082p-flight-planner`) is a *clean export* at
+`~/Documents/Flying/n9082p-flight-planner` (account ID genericized; POH chart scans, PDFs,
+and secrets excluded). Re-sync it after changes via the rsync → verify → commit → push flow.
+
+**AWS inventory** (account `<AWS_ACCOUNT_ID>`, `us-west-2` unless noted):
+- **App:** Lambda `n9082p-planner` (env `PLANNER_PASSWORD`, `DATA_BUCKET`, `DATA_KEY`) + role `n9082p-planner-role` + public Function URL.
+- **Edge:** CloudFront `ESYJH857V9VMT` → `flight-planning.davidameneyro.com`; ACM cert `e50c5b65-…` (us-east-1).
+- **Data:** S3 `n9082p-planner-data-<AWS_ACCOUNT_ID>` (private); refresher Lambda `n9082p-data-refresh` + role `n9082p-data-refresh-role`; EventBridge `n9082p-data-refresh-28d` (`rate(28 days)`).
+- **Monitoring:** SNS `n9082p-alerts` (email confirmed) + CloudWatch alarm `n9082p-data-refresh-errors`.
+
+**Common tasks** (run `aws sso login` first):
+- Redeploy app: `PLANNER_PASSWORD=<pw> bash deploy/deploy.sh`
+- Redeploy refresher / schedule: `bash deploy/deploy_refresh.sh`
+- Force a data refresh now: `aws lambda invoke --function-name n9082p-data-refresh --region us-west-2 /tmp/r.json`
+- (Re)configure alerts: `bash deploy/deploy_alerts.sh`
+- App logs / data source: `aws logs tail /aws/lambda/n9082p-planner --since 1h --region us-west-2` (look for `[data] source=…`)
+
+**Behavior on failure.** A failed monthly refresh emails you (CloudWatch → SNS). Staleness is
+also visible as "Airport data: &lt;date&gt;" on every sheet. The app falls back to the bundled
+`data/airports_faa.json` if S3 is unavailable, so it never hard-fails.
+
 ## Resume this work
 ```
 cd /Users/papillonm5/Documents/Flying/N9082P/Flight-Planning-Tool && claude --resume N9082P-Perfomance-Online

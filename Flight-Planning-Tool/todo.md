@@ -1,5 +1,10 @@
 # Flight Planning Tool — Web App Build (todo)
 
+> ✅ **PROJECT COMPLETE (2026-05-30).** Live at https://flight-planning.davidameneyro.com (cookie login);
+> self-refreshing FAA data (S3 + 28-day refresher Lambda); failure email alerts (confirmed) + on-sheet
+> build-date; public repo current. **Full state, AWS inventory, and ops commands → README.md "Operations & handoff".**
+> Resume: `cd /Users/papillonm5/Documents/Flying/N9082P/Flight-Planning-Tool && claude --resume N9082P-Perfomance-Online`
+
 **Goal:** Mobile web page on AWS where I enter departure / destination / takeoff weight /
 fuel and get back the A5 safety sheet. Build & test locally now; deploy once AWS CLI is
 configured.
