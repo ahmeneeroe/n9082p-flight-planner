@@ -37,6 +37,9 @@ if ! aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
     --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
   echo "    created $ROLE; waiting for IAM propagation..."; sleep 12
 fi
+# allow the app to read the live (monthly-refreshed) data bundle from S3
+aws iam put-role-policy --role-name "$ROLE" --policy-name data-bucket-read \
+  --policy-document "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"s3:GetObject\"],\"Resource\":\"arn:aws:s3:::n9082p-planner-data-${ACCOUNT}/*\"}]}" >/dev/null
 
 echo "==> deploying function"
 if aws lambda get-function --function-name "$FUNC" --region "$REGION" >/dev/null 2>&1; then
@@ -44,13 +47,13 @@ if aws lambda get-function --function-name "$FUNC" --region "$REGION" >/dev/null
   aws lambda wait function-updated --function-name "$FUNC" --region "$REGION"
   aws lambda update-function-configuration --function-name "$FUNC" --region "$REGION" \
     --runtime "$RUNTIME" --handler handler.lambda_handler --timeout 30 --memory-size 512 \
-    --environment "Variables={PLANNER_PASSWORD=$PASSWORD}" >/dev/null
+    --environment "Variables={PLANNER_PASSWORD=$PASSWORD,DATA_BUCKET=n9082p-planner-data-${ACCOUNT},DATA_KEY=airports_faa.json}" >/dev/null
   aws lambda wait function-updated --function-name "$FUNC" --region "$REGION"
 else
   aws lambda create-function --function-name "$FUNC" --region "$REGION" \
     --runtime "$RUNTIME" --handler handler.lambda_handler --role "$ROLE_ARN" \
     --zip-file "fileb://$ZIP" --timeout 30 --memory-size 512 \
-    --environment "Variables={PLANNER_PASSWORD=$PASSWORD}" >/dev/null
+    --environment "Variables={PLANNER_PASSWORD=$PASSWORD,DATA_BUCKET=n9082p-planner-data-${ACCOUNT},DATA_KEY=airports_faa.json}" >/dev/null
   aws lambda wait function-active --function-name "$FUNC" --region "$REGION"
 fi
 

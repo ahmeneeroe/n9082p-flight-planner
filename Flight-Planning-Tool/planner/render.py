@@ -130,7 +130,9 @@ def render_html(sheet):
         f'<div class="cols">{_block_html(sheet["dep"])}{_block_html(sheet["dest"])}</div>'
         f'<div class="summary">{summary}</div>'
         f'<div class="notes">{_esc(sheet["notes"])} &nbsp; Generated {_esc(sheet["generated"])}'
-        + (f' &nbsp; METAR age: {_esc(age_str)}.' if age_str else "") + '</div>')
+        + (f' &nbsp; METAR age: {_esc(age_str)}.' if age_str else "")
+        + (f' &nbsp; Airport data: {_esc(sheet.get("data_built"))}' if sheet.get("data_built") else "")
+        + '</div>')
     return _page(f'{sheet["tail"]} Safety — {sheet["route"]}', body)
 
 

@@ -14,7 +14,7 @@ Uses only the Python standard library (urllib) so it can also run as a refresh L
 
 Usage:  python3 tools/build_faa_airports.py [out.json]
 """
-import json, os, sys, urllib.parse, urllib.request
+import datetime, json, os, sys, urllib.parse, urllib.request
 
 ORG = "https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services"
 AIRPORTS = f"{ORG}/US_Airport/FeatureServer/0/query"
@@ -165,6 +165,7 @@ def main(out_path):
     out = {"_meta": {"source": "FAA AIS (AeronauticalInformationServices_FAA)",
                      "airports": len(airports), "index_keys": len(index),
                      "skipped": skipped,
+                     "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%MZ"),
                      "note": "Rerun monthly (FAA 28-day cycle) and redeploy."},
            "index": index, "airports": airports}
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)

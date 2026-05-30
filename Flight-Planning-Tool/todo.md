@@ -22,8 +22,10 @@ configured.
 - ✅ DEPLOYED & LIVE: **https://flight-planning.davidameneyro.com** (CloudFront + custom domain, ACM cert) and the raw Lambda Function URL. Signed-cookie login.
 - ✅ Fixed: Oct-2025 dual-permission 403 (added lambda:InvokeFunction); WWW-Authenticate remap (Basic Auth → cookie login).
 - ✅ WRAP-UP: README + memory updated; session named N9082P-Perfomance-Online.
-- ⏳ OPTIONAL NEXT: automate monthly FAA data refresh (EventBridge); rotate password off the tail number.
-- ⏳ FOLLOW-UP (requested 2026-05-30): **add this project to GitHub** (`gh repo create` + push; gh is authed as ahmeneeroe over HTTPS). Decide public vs private and whether to include data/airports_faa.json (5.9 MB) or .gitignore it + document the build step.
+- ✅ DECISION (owner, 2026-05-30): keep the password as-is (the tail number) despite the public repo — owner accepts others may guess it; **do not re-flag.** Change later via `aws lambda update-function-configuration --function-name n9082p-planner --region us-west-2 --environment Variables={PLANNER_PASSWORD=<new>}` only if owner asks.
+- ✅ DONE 2026-05-30: **monthly FAA data refresh automated** — S3 bucket `n9082p-planner-data-<AWS_ACCOUNT_ID>` + refresher Lambda `n9082p-data-refresh` (EventBridge `rate(28 days)`, `deploy/deploy_refresh.sh`) rebuilds from FAA AIS → S3; app reads S3 (verified `[data] source=s3`) with bundled fallback.
+- ✅ DONE 2026-05-30: **refresh monitoring** — SNS `n9082p-alerts` + CloudWatch alarm `n9082p-data-refresh-errors` email David.ameneyro@gmail.com on a failed refresh (`deploy/deploy_alerts.sh`); data stamped with `built` date, shown as "Airport data: &lt;date&gt;" on the sheet. (No active "no-run" alarm — CloudWatch 1-week window cap; on-sheet date covers staleness.) ⚠️ owner must confirm the SNS subscription email once.
+- ✅ DONE 2026-05-30: pushed to GitHub **PUBLIC** → https://github.com/ahmeneeroe/n9082p-flight-planner (72 files). Clean export at `~/Documents/Flying/n9082p-flight-planner` (excludes POH chart PNGs, PDFs, .claude/, build junk; account ID genericized; password scrubbed from docs; includes data/airports_faa.json).
 - **Safety:** A5 must carry an "EXPERIMENTAL — verify against POH" banner (digitized chart data, 5% bias, unvalidated). See memory `feedback_performance_separation`.
 - **v1 inputs:** departure, destination, takeoff weight, fuel (gal). Weather = auto METAR. Everything else defaults (65% power, 2400 RPM, best economy, standard 2x technique).
 

@@ -269,6 +269,7 @@ def build_sheet(dep_id, dest_id, takeoff_weight_lb, fuel_gal=DEFAULT_FUEL_GAL,
         "max_gross": MAX_GROSS, "max_landing": MAX_LANDING,
         "dep": dep_block, "dest": dest_block, "summary": summary,
         "metar_age": {"dep": dep_age, "dest": dest_age},
+        "data_built": data.meta().get("built"),
         "notes": ("EXPERIMENTAL — digitized POH Sec 5 charts, 5% conservative bias, "
                   "NOT flight-tested. Std = 2× short-field. Verify against the POH. "
                   "Wind components use runway number vs METAR wind."),

@@ -64,14 +64,19 @@ bash deploy/build.sh && aws lambda update-function-code \
   --function-name n9082p-planner --region us-west-2 --zip-file fileb://n9082p-planner.zip
 ```
 
-## Monthly FAA data refresh (not yet automated)
+## Monthly FAA data refresh (automated)
+
+**Automated:** S3 bucket `n9082p-planner-data-<AWS_ACCOUNT_ID>` holds the live bundle; the
+`n9082p-data-refresh` Lambda (EventBridge `rate(28 days)`, via `deploy/deploy_refresh.sh`)
+rebuilds it from FAA AIS and uploads to S3, and the app reads it from S3 (`DATA_BUCKET` env)
+with the bundled file as fallback. To refresh manually / rebuild the bundled baseline:
 ```
 aws sso login
 python3 tools/build_faa_airports.py   # rebuild data/airports_faa.json from FAA AIS
 bash deploy/build.sh && aws lambda update-function-code \
   --function-name n9082p-planner --region us-west-2 --zip-file fileb://n9082p-planner.zip
 ```
-Could be automated with an EventBridge-scheduled refresh Lambda — a future step.
+The bundled `data/airports_faa.json` remains the fallback baseline; the manual steps above also refresh it for the next deploy.
 
 ## Two AWS gotchas (already solved, documented in research.md)
 1. **403 on the public Function URL** was *not* an org policy — since **Oct 2025** a public (NONE) URL
