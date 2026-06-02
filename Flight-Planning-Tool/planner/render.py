@@ -94,11 +94,13 @@ def _block_html(blk):
                   f'<div class="speeds"><span>Vx <b>{s["vx"]}</b> &nbsp; Vy <b>{s["vy"]}</b> '
                   f'&nbsp; ROC <b>{s["roc"]}</b> fpm</span></div>')
     else:
-        speeds = (f'<div class="sub-header">Stall / Approach</div>'
+        speeds = (f'<div class="sub-header">Stall / Approach / Climb</div>'
                   f'<div class="speeds"><span>Vs: <b>{s["vs_clean"]}</b> cln '
                   f'<b>{s["vs_15"]}</b> 15&deg; <b>{s["vs_full"]}</b> full</span>'
                   f'<span style="margin-left:auto">Vapp: <b class="highlight">{s["vapp"]} kt</b>'
-                  f'</span></div>')
+                  f'</span></div>'
+                  f'<div class="speeds"><span>Climb (landing wt @ field DA): '
+                  f'ROC <b>{s["roc"]}</b> fpm &nbsp; Vy <b>{s["vy"]}</b></span></div>')
     remarks = "".join(f'<div class="remark">{_esc(r)}</div>' for r in blk["remarks"])
     priv = ' <span class="rwy-info">(private)</span>' if blk.get("private") else ""
     return (f'<div class="airport">'
@@ -122,7 +124,8 @@ def render_html(sheet):
         f'<div class="top-params">TO <b>{sheet["to_weight"]}</b> lb &nbsp;|&nbsp; '
         f'LDG <b>{sheet["ldg_weight"]}</b> lb &nbsp;|&nbsp; Fuel <b>{sheet["fuel_gal"]}</b> gal '
         f'&nbsp;|&nbsp; Burn <b>~{sheet["burn_gal"]}</b> gal &nbsp;|&nbsp; {sheet["dist_nm"]} nm '
-        f'&nbsp;|&nbsp; {_esc(sheet["power"])} {sheet["rpm"]} {_esc(sheet["mixture"])}</div></div>'
+        f'&nbsp;|&nbsp; {_esc(sheet["power"])} {sheet["rpm"]} {_esc(sheet["mixture"])}'
+        f'&nbsp;|&nbsp; Best glide <b>{sheet["best_glide_kt"]}</b> kt @{sheet["glide_weight"]} lb (est)</div></div>'
         f'<div class="warnbar">Experimental &mdash; digitized POH approximation, not flight-tested. '
         f'Verify against the POH.</div>'
         f'<div class="actions"><a href="/">&larr; New plan</a>'

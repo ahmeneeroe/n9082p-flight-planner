@@ -17,6 +17,7 @@ LB_PER_GAL = 6.0
 MAX_GROSS = 3100
 MAX_LANDING = 2945
 DEFAULT_FUEL_GAL = 86
+BEST_GLIDE_GROSS_KT = 91  # POH Sec 3 p3-2: optimum (max-distance) glide at 3100 lb gross
 
 # FAA surface category (from the data bundle) -> calculator surface key.
 _SURFACE_TO_CALC = {
@@ -29,6 +30,17 @@ _SURFACE_TO_CALC = {
 
 def _std_temp_f(alt_ft):
     return 59.0 - 0.003566 * alt_ft
+
+
+def _best_glide_kt(weight_lb):
+    """Best-glide (max-distance) speed in KIAS at a given weight -- DERIVED ESTIMATE, not POH.
+
+    POH Sec 3 (p3-2 / p3-5) gives 91 kt only at 3100 lb gross and notes *qualitatively* that
+    best glide "decreases as gross weight decreases" (no rate). Best-L/D speed scales with
+    sqrt(weight), so scale the POH gross value: 91 * sqrt(W / 3100). Clamped to <= the gross value.
+    """
+    w = min(weight_lb, MAX_GROSS)
+    return round(BEST_GLIDE_GROSS_KT * (w / MAX_GROSS) ** 0.5)
 
 
 class AirportNotFound(ValueError):
@@ -166,6 +178,9 @@ def _airport_block(apt, wx, calc, weight_lb, phase):
         speeds.update(vx=cl["vx_kt"], vy=cl["vy_kt"], roc=cl["rate_of_climb_fpm"])
     else:
         speeds["vapp"] = round(stall["approach_speed_kt"])
+        cl = calc.climb(pa, oat, weight_lb=weight_lb)  # climb capability at field DA + landing wt
+        speeds["roc"] = cl["rate_of_climb_fpm"]
+        speeds["vy"] = cl["vy_kt"]
 
     remark_bits = []
     if apt["runways"]:
@@ -229,6 +244,8 @@ def build_sheet(dep_id, dest_id, takeoff_weight_lb, fuel_gal=DEFAULT_FUEL_GAL,
                                    mixture, fuel_gal)
     if landing_weight_lb is None:
         landing_weight_lb = max(1900.0, takeoff_weight_lb - burn * LB_PER_GAL)
+    glide_weight = (takeoff_weight_lb + landing_weight_lb) / 2.0  # mid-flight weight
+    best_glide_kt = _best_glide_kt(glide_weight)
 
     dep_block = _airport_block(dep, dep_wx, calc, takeoff_weight_lb, "takeoff")
     dest_block = _airport_block(dest, dest_wx, calc, landing_weight_lb, "landing")
@@ -261,6 +278,8 @@ def build_sheet(dep_id, dest_id, takeoff_weight_lb, fuel_gal=DEFAULT_FUEL_GAL,
         "generated": now.strftime("%Y-%m-%d %H:%MZ"),
         "to_weight": round(takeoff_weight_lb),
         "ldg_weight": round(landing_weight_lb),
+        "best_glide_kt": best_glide_kt,
+        "glide_weight": round(glide_weight),
         "fuel_gal": round(fuel_gal),
         "burn_gal": round(burn),
         "dist_nm": round(dist_nm),
@@ -272,7 +291,9 @@ def build_sheet(dep_id, dest_id, takeoff_weight_lb, fuel_gal=DEFAULT_FUEL_GAL,
         "data_built": data.meta().get("built"),
         "notes": ("EXPERIMENTAL — digitized POH Sec 5 charts, 5% conservative bias, "
                   "NOT flight-tested. Std = 2× short-field. Verify against the POH. "
-                  "Wind components use runway number vs METAR wind."),
+                  "Wind components use runway number vs METAR wind. "
+                  "Best glide 91 kt @ gross = POH Sec 3; mid-flight value is a derived sqrt-weight "
+                  "estimate. Dest climb = ROC at landing weight + field METAR."),
     }
 
 
