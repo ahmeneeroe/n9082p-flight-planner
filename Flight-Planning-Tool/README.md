@@ -98,6 +98,9 @@ The bundled `data/airports_faa.json` remains the fallback baseline; the manual s
 
 ## Operations & handoff
 
+> **For an exhaustive snapshot** — architecture, full AWS inventory, the card's layout/rendering, every
+> performance & data finding, decisions, and gotchas — see **`HANDOFF.md`** (the single read-this-first doc).
+
 **Working copy vs. published repo.** Develop and deploy from this working copy
 (`~/Documents/Flying/N9082P/Flight-Planning-Tool`, with the sibling `../Performance`). The
 public GitHub repo (`github.com/ahmeneeroe/n9082p-flight-planner`) is a *clean export* at
